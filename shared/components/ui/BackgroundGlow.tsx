@@ -1,3 +1,5 @@
+import { cn } from "@/shared/lib/utils";
+
 type BackgroundGlowColor = "turquoise" | "mustard" | "magenta";
 
 type BackgroundGlowProps = {
@@ -15,13 +17,11 @@ export function BackgroundGlow({ color, className }: BackgroundGlowProps) {
   return (
     <div
       aria-hidden="true"
-      className={[
+      className={cn(
         "pointer-events-none absolute rounded-full blur-[100px] opacity-20",
         colorClasses[color],
-        className,
-      ]
-        .filter(Boolean)
-        .join(" ")}
+        className
+      )}
     />
   );
 }
