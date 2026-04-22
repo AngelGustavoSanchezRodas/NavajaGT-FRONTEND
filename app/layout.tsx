@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
+import { Toaster } from "sonner";
 import { Footer } from "@/shared/components/layout/Footer";
 import { PublicNavbar } from "@/shared/components/layout/PublicNavbar";
 import "./globals.css";
@@ -33,6 +34,7 @@ export default function RootLayout({
         <PublicNavbar />
         <main className="flex-1">{children}</main>
         <Footer />
+        <Toaster richColors position="top-right" />
       </body>
     </html>
   );

@@ -3,12 +3,17 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
+import { authService } from "@/modules/auth/services/auth.service";
 
 export function PublicNavbar() {
   const pathname = usePathname();
   const [isMounted, setIsMounted] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
-  useEffect(() => setIsMounted(true), []);
+  useEffect(() => {
+    setIsMounted(true);
+    setIsLoggedIn(authService.isAuthenticated());
+  }, []);
 
   if (pathname.startsWith("/dashboard")) {
     return null;
@@ -23,7 +28,7 @@ export function PublicNavbar() {
 
         {!isMounted ? (
           <div className="h-10 w-32 animate-pulse rounded-full bg-slate-200" />
-        ) : (
+        ) : !isLoggedIn ? (
           <div className="flex items-center gap-3">
             <Link
               href="/login"
@@ -37,6 +42,25 @@ export function PublicNavbar() {
             >
               Registro
             </Link>
+          </div>
+        ) : (
+          <div className="flex items-center gap-3">
+            <Link
+              href="/dashboard"
+              className="rounded-full bg-brand-turquoise px-4 py-2 text-sm font-semibold text-white transition hover:opacity-90"
+            >
+              Ir a mi Panel
+            </Link>
+            <button
+              type="button"
+              onClick={() => {
+                authService.logout();
+                window.location.href = "/";
+              }}
+              className="rounded-full px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-100"
+            >
+              Cerrar sesión
+            </button>
           </div>
         )}
       </div>
