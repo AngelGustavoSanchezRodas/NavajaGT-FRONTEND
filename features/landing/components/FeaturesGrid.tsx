@@ -1,20 +1,9 @@
 import { 
-  FileStack, 
-  Scissors, 
-  Minimize2, 
-  FileImage, 
-  FileText, 
-  FilePenLine, 
-  Lock, 
-  Unlock,
-  RotateCw,
-  Type,
-  Search,
-  FileCode,
+  Link,
   Image as ImageIcon,
+  Wifi,
   Zap,
   Globe,
-  Trash2,
   ShieldCheck
 } from "lucide-react";
 import { GlassCard } from "@/shared/components/ui/GlassCard";
@@ -22,89 +11,26 @@ import { cn } from "@/shared/lib/utils";
 
 const TOOLS = [
   {
-    title: "Unir PDF",
-    description: "Combina múltiples archivos PDF en un solo documento. Rápido y seguro.",
-    icon: FileStack,
+    title: "Acortador Inteligente",
+    description: "Crea enlaces cortos, personalizados y rastreables en milisegundos con analíticas en tiempo real.",
+    icon: Link,
     color: "text-brand-turquoise",
     bgColor: "bg-brand-turquoise/10",
   },
   {
-    title: "Dividir PDF",
-    description: "Extrae páginas o divide un PDF en varios archivos más pequeños.",
-    icon: Scissors,
+    title: "Biolink Builder",
+    description: "Diseña tu propia página de aterrizaje personalizada para tus redes sociales con un diseño premium.",
+    icon: ImageIcon,
     color: "text-brand-magenta",
     bgColor: "bg-brand-magenta/10",
   },
   {
-    title: "Comprimir PDF",
-    description: "Reduce el tamaño de tus archivos PDF sin perder calidad.",
-    icon: Minimize2,
+    title: "Generador QR Wi-Fi",
+    description: "Comparte tu conexión de red de forma segura mediante códigos QR listos para escanear.",
+    icon: Wifi,
     color: "text-brand-turquoise",
     bgColor: "bg-brand-turquoise/10",
-  },
-  {
-    title: "PDF a JPG",
-    description: "Convierte páginas de PDF en imágenes JPG de alta calidad.",
-    icon: FileImage,
-    color: "text-brand-magenta",
-    bgColor: "bg-brand-magenta/10",
-  },
-  {
-    title: "JPG a PDF",
-    description: "Crea documentos PDF a partir de imágenes JPG.",
-    icon: FileText,
-    color: "text-brand-turquoise",
-    bgColor: "bg-brand-turquoise/10",
-  },
-  {
-    title: "Editar PDF",
-    description: "Añade texto, imágenes y formas a tus documentos PDF.",
-    icon: FilePenLine,
-    color: "text-brand-magenta",
-    bgColor: "bg-brand-magenta/10",
-  },
-  {
-    title: "Proteger PDF",
-    description: "Añade contraseñas y cifrado a tus archivos PDF.",
-    icon: Lock,
-    color: "text-brand-turquoise",
-    bgColor: "bg-brand-turquoise/10",
-  },
-  {
-    title: "Desbloquear PDF",
-    description: "Elimina contraseñas y restricciones de archivos PDF.",
-    icon: Unlock,
-    color: "text-brand-magenta",
-    bgColor: "bg-brand-magenta/10",
-  },
-  {
-    title: "Rotar PDF",
-    description: "Gira las páginas de tu PDF a la orientación deseada.",
-    icon: RotateCw,
-    color: "text-brand-turquoise",
-    bgColor: "bg-brand-turquoise/10",
-  },
-  {
-    title: "Marca de Agua",
-    description: "Añade texto o imágenes como marca de agua a tus PDF.",
-    icon: Type,
-    color: "text-brand-magenta",
-    bgColor: "bg-brand-magenta/10",
-  },
-  {
-    title: "OCR PDF",
-    description: "Convierte PDFs escaneados en texto editable.",
-    icon: Search,
-    color: "text-brand-turquoise",
-    bgColor: "bg-brand-turquoise/10",
-  },
-  {
-    title: "HTML a PDF",
-    description: "Convierte páginas web y código HTML a formato PDF.",
-    icon: FileCode,
-    color: "text-brand-magenta",
-    bgColor: "bg-brand-magenta/10",
-  },
+  }
 ];
 
 export function FeaturesGrid() {

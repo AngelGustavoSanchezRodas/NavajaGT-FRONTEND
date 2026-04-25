@@ -34,8 +34,8 @@ export default function Home() {
           </h1>
           
           <p className="text-lg text-slate-600 mb-10 max-w-2xl leading-relaxed">
-            Herramientas online potentes y fáciles de usar para gestionar tus archivos digitales. 
-            Organiza, convierte, edita y optimiza documentos en un solo lugar.
+            La plataforma definitiva para la gestión de enlaces y presencia digital. 
+            Crea biolinks premium, acorta URLs con analíticas y genera QRs seguros en un solo lugar.
           </p>
           
           <div className="w-full mb-12">
@@ -44,7 +44,7 @@ export default function Home() {
 
           {/* Category Badges (Inspired by IAEstudio) */}
           <div className="flex flex-wrap justify-center gap-3">
-            {['PDF', 'Imagen', 'Video', 'Texto', 'Seguridad'].map((cat) => (
+            {['Enlaces', 'Biolinks', 'Seguridad QR', 'Analítica'].map((cat) => (
               <span 
                 key={cat}
                 className="px-6 py-2 rounded-full bg-white border border-slate-100 text-slate-600 text-sm font-bold shadow-sm hover:border-brand-turquoise/30 hover:text-brand-turquoise transition-all cursor-default"
@@ -59,7 +59,7 @@ export default function Home() {
         <section className="pb-16 pt-8">
           <div className="mb-12 text-center">
             <h2 className="text-2xl font-bold text-slate-900">Herramientas Profesionales</h2>
-            <p className="mt-2 text-sm text-slate-500">Todo lo que necesitas para gestionar tus archivos en un solo clic.</p>
+            <p className="mt-2 text-sm text-slate-500">Todo lo que necesitas para potenciar tu presencia digital en un solo clic.</p>
           </div>
           <FeaturesGrid />
         </section>
