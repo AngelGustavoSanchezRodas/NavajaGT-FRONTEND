@@ -1,6 +1,10 @@
 import Cookies from "js-cookie";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080/api/auth";
+if (!process.env.NEXT_PUBLIC_API_URL) {
+  throw new Error("La variable de entorno NEXT_PUBLIC_API_URL no está definida");
+}
+
+const API_URL = `${process.env.NEXT_PUBLIC_API_URL}/api/auth`;
 
 class AuthService {
   async login(email: string, password: string) {

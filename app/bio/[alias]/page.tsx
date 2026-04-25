@@ -1,6 +1,7 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { EnlaceResponse } from '@/types/biolink';
+import { siteConfig } from '@/shared/config/site';
 
 interface Props {
   params: { alias: string };
@@ -110,7 +111,7 @@ export default async function BioPage({ params }: Props) {
 
         {/* Footer / Branding */}
         <footer className="pt-12 pb-6 opacity-40 text-xs font-medium uppercase tracking-widest">
-          Potenciado por NavajaGT
+          Potenciado por {siteConfig.name}
         </footer>
       </div>
     </main>
