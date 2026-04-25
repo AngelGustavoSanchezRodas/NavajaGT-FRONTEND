@@ -1,42 +1,36 @@
 import Cookies from 'js-cookie';
 
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
-
-if (!BASE_URL) {
-  throw new Error('La variable de entorno NEXT_PUBLIC_API_URL no está definida');
-}
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export async function apiFetch<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
-  const token = Cookies.get('token');
-  
-  const headers = new Headers(options.headers || {});
-  
-  // Inyectar el token si existe
-  if (token) {
-    headers.set('Authorization', `Bearer ${token}`);
+  if (!API_BASE_URL) {
+    throw new Error('La variable de entorno NEXT_PUBLIC_API_URL no está definida');
   }
-  
-  // Establecer Content-Type por defecto si es una petición con cuerpo
-  if (!headers.has('Content-Type') && options.body) {
-    headers.set('Content-Type', 'application/json');
+
+  const token = Cookies.get('token');
+
+  const defaultHeaders: Record<string, string> = {
+    'Content-Type': 'application/json',
+  };
+
+  if (token) {
+    defaultHeaders['Authorization'] = `Bearer ${token}`;
   }
 
   const config: RequestInit = {
     ...options,
-    headers,
+    headers: {
+      ...defaultHeaders,
+      ...options.headers,
+    },
   };
 
-  const response = await fetch(`${BASE_URL}${endpoint}`, config);
-
-  // Manejar respuestas sin contenido (204 No Content)
-  if (response.status === 204) {
-    return {} as T;
-  }
+  const response = await fetch(`${API_BASE_URL}${endpoint}`, config);
 
   const data = await response.json().catch(() => ({}));
 
   if (!response.ok) {
-    throw new Error(data?.message || `Error en la petición: ${response.status} ${response.statusText}`);
+    throw new Error(data?.message || 'Error en la comunicación con el servidor');
   }
 
   return data as T;

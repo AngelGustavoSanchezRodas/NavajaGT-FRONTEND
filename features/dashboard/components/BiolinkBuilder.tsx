@@ -9,7 +9,7 @@ import { Save, Loader2, CheckCircle, AlertCircle } from 'lucide-react';
 const BiolinkBuilder: React.FC = () => {
   const [metadata, setMetadata] = useState<MetadataBiolink>(DEFAULT_BIOLINK_TEMPLATE);
   const [aliasPersonalizado, setAliasPersonalizado] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const [status, setStatus] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
 
   const handleProfileChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -41,13 +41,13 @@ const BiolinkBuilder: React.FC = () => {
   };
 
   const handleSave = async () => {
-    setIsSubmitting(true);
+    setIsSaving(true);
     setStatus(null);
     try {
       await apiFetch('/api/v1/core/enlaces', {
         method: 'POST',
         body: JSON.stringify({
-          aliasPersonalizado,
+          aliasPersonalizado: aliasPersonalizado || null,
           tipo: 'BIOLINK',
           metadata: metadata
         })
@@ -57,7 +57,7 @@ const BiolinkBuilder: React.FC = () => {
     } catch (error: any) {
       setStatus({ type: 'error', message: error.message || 'Error al guardar el Biolink' });
     } finally {
-      setIsSubmitting(false);
+      setIsSaving(false);
     }
   };
 
@@ -83,7 +83,7 @@ const BiolinkBuilder: React.FC = () => {
                   value={aliasPersonalizado}
                   onChange={(e) => setAliasPersonalizado(e.target.value)}
                   className="flex-1 px-4 py-2 border border-zinc-300 rounded-r-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all"
-                  placeholder="mi-alias"
+                  placeholder="mi-marca"
                 />
               </div>
             </div>
@@ -192,10 +192,10 @@ const BiolinkBuilder: React.FC = () => {
 
         <button
           onClick={handleSave}
-          disabled={isSubmitting}
+          disabled={isSaving}
           className="w-full flex items-center justify-center space-x-2 py-4 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-700 transition-all transform active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed shadow-lg shadow-indigo-200"
         >
-          {isSubmitting ? (
+          {isSaving ? (
             <>
               <Loader2 className="w-5 h-5 animate-spin" />
               <span>Guardando...</span>

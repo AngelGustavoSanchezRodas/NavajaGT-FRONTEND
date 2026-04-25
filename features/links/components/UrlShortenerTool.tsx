@@ -1,7 +1,7 @@
 "use client";
 
 import { FormEvent, useState } from "react";
-import { Link, Loader2, QrCode, Copy, Check } from "lucide-react";
+import { Link, Loader2, QrCode, Copy, Check, ExternalLink } from "lucide-react";
 import { GlassCard } from "@/shared/components/ui/GlassCard";
 import { apiFetch } from "@/shared/lib/api";
 
@@ -9,14 +9,14 @@ export function UrlShortenerTool() {
   const [url, setUrl] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [successUrl, setSuccessUrl] = useState<string | null>(null);
+  const [successAlias, setSuccessAlias] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setLoading(true);
     setError(null);
-    setSuccessUrl(null);
+    setSuccessAlias(null);
 
     try {
       const response: any = await apiFetch('/api/v1/core/enlaces', {
@@ -27,8 +27,7 @@ export function UrlShortenerTool() {
         })
       });
       
-      const baseUrl = window.location.origin;
-      setSuccessUrl(`${baseUrl}/${response.alias}`);
+      setSuccessAlias(response.alias);
     } catch (err: any) {
       setError(err.message || "Ocurrió un error inesperado");
     } finally {
@@ -36,9 +35,12 @@ export function UrlShortenerTool() {
     }
   };
 
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || (typeof window !== 'undefined' ? window.location.origin : '');
+  const shortUrl = successAlias ? `${appUrl}/${successAlias}` : '';
+
   const copyToClipboard = () => {
-    if (successUrl) {
-      navigator.clipboard.writeText(successUrl);
+    if (shortUrl) {
+      navigator.clipboard.writeText(shortUrl);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     }
@@ -90,14 +92,24 @@ export function UrlShortenerTool() {
         </div>
       )}
 
-      {successUrl && (
+      {successAlias && (
         <div className="mt-6 p-4 bg-emerald-50 border border-emerald-100 rounded-2xl animate-in fade-in slide-in-from-top-4">
-          <p className="text-xs font-bold text-emerald-600 uppercase tracking-wider mb-2">¡Link generado!</p>
+          <div className="flex items-center justify-between mb-2">
+            <p className="text-xs font-bold text-emerald-600 uppercase tracking-wider">¡Link generado!</p>
+            <a 
+              href={shortUrl} 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="text-emerald-600 hover:text-emerald-700 transition-colors flex items-center gap-1 text-xs font-bold"
+            >
+              Probar <ExternalLink className="h-3 w-3" />
+            </a>
+          </div>
           <div className="flex items-center gap-2">
             <input
               type="text"
               readOnly
-              value={successUrl}
+              value={shortUrl}
               className="flex-1 bg-white/50 border-none outline-none text-sm text-slate-900 px-3 py-2 rounded-lg"
             />
             <button
