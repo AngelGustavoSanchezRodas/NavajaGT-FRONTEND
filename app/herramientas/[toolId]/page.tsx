@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import { UrlShortenerTool } from "@/features/links/components/UrlShortenerTool";
 import BiolinkBuilder from "@/features/dashboard/components/BiolinkBuilder";
 import { ContactQrTool } from "@/features/tools/components/ContactQrTool";

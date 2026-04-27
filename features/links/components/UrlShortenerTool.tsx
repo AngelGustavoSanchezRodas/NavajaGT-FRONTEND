@@ -70,9 +70,9 @@ export function UrlShortenerTool() {
   };
 
   return (
-    <GlassCard className="mx-auto w-full max-w-xl border-none p-6 sm:p-8 shadow-2xl shadow-brand-turquoise/10">
+    <div className="mx-auto w-full max-w-xl rounded-[2.5rem] bg-white border border-slate-200 p-6 sm:p-10 shadow-[0_20px_50px_-12px_rgba(0,0,0,0.1)]">
       <div className="flex items-center justify-between mb-2">
-        <h3 className="text-xl font-bold text-slate-900">Acortador Rápido</h3>
+        <h3 className="text-2xl font-[950] text-slate-900 tracking-tight">Acortador Rápido</h3>
         {successAlias && (
           <button 
             onClick={handleReset}
@@ -83,12 +83,12 @@ export function UrlShortenerTool() {
           </button>
         )}
       </div>
-      <p className="text-sm text-slate-500 mb-6">Genera links rastreables y seguros en milisegundos.</p>
+      <p className="text-sm font-medium text-slate-500 mb-8">Genera links rastreables y seguros en milisegundos.</p>
 
       {!successAlias ? (
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <div className="relative flex items-center">
-            <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4">
+            <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-5">
               <Link className="h-4 w-4 text-slate-400" />
             </div>
             <input
@@ -97,7 +97,7 @@ export function UrlShortenerTool() {
               value={url}
               onChange={(event) => setUrl(event.target.value)}
               placeholder="Pega tu enlace largo aquí..."
-              className="h-14 w-full rounded-2xl bg-white/50 pl-12 pr-4 text-base text-slate-900 outline-none transition-all focus:bg-white focus:ring-2 focus:ring-brand-turquoise/20 placeholder:text-slate-400"
+              className="h-16 w-full rounded-2xl bg-slate-50 border border-transparent pl-12 pr-4 text-base text-slate-900 outline-none transition-all focus:bg-white focus:border-brand-turquoise/30 focus:ring-4 focus:ring-brand-turquoise/5 placeholder:text-slate-400 font-medium"
               required
             />
           </div>
@@ -105,7 +105,7 @@ export function UrlShortenerTool() {
           <button 
             type="button"
             onClick={() => setShowAdvanced(!showAdvanced)}
-            className="flex w-fit items-center gap-2 text-xs font-bold text-slate-400 hover:text-slate-900 transition-colors"
+            className="flex w-fit items-center gap-2 px-1 text-xs font-bold text-slate-400 hover:text-slate-900 transition-colors"
           >
             <Settings2 size={14} />
             {showAdvanced ? "Opciones avanzadas" : "Personalizar enlace"}
@@ -119,8 +119,8 @@ export function UrlShortenerTool() {
                 exit={{ opacity: 0, height: 0 }}
                 className="overflow-hidden"
               >
-                <div className="relative flex items-center pt-1">
-                  <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4 pt-1">
+                <div className="relative flex items-center pt-1 pb-2">
+                  <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-5 pt-1">
                     <span className="text-sm font-bold text-slate-400 italic">@</span>
                   </div>
                   <input
@@ -129,7 +129,7 @@ export function UrlShortenerTool() {
                     value={alias}
                     onChange={(event) => setAlias(event.target.value)}
                     placeholder="Alias personalizado (opcional)"
-                    className="h-14 w-full rounded-2xl bg-white/50 pl-12 pr-4 text-base text-slate-900 outline-none transition-all focus:bg-white focus:ring-2 focus:ring-brand-turquoise/20 placeholder:text-slate-400"
+                    className="h-16 w-full rounded-2xl bg-slate-50 border border-transparent pl-12 pr-4 text-base text-slate-900 outline-none transition-all focus:bg-white focus:border-brand-turquoise/30 focus:ring-4 focus:ring-brand-turquoise/5 placeholder:text-slate-400 font-medium"
                   />
                 </div>
               </motion.div>
@@ -139,16 +139,16 @@ export function UrlShortenerTool() {
           <button
             type="submit"
             disabled={loading}
-            className="group relative flex h-14 w-full items-center justify-center gap-3 overflow-hidden rounded-2xl bg-brand-turquoise px-8 text-base font-semibold text-white transition-all hover:scale-[1.02] hover:opacity-90 active:scale-95 disabled:cursor-not-allowed disabled:opacity-70"
+            className="group relative flex h-16 w-full items-center justify-center gap-3 overflow-hidden rounded-2xl bg-brand-turquoise px-8 text-base font-black text-white transition-all hover:opacity-95 active:scale-95 disabled:cursor-not-allowed disabled:opacity-70 shadow-lg shadow-brand-turquoise/20"
           >
             {loading ? (
               <>
-                <Loader2 className="h-4 w-4 animate-spin" />
+                <Loader2 className="h-5 w-5 animate-spin" />
                 <span>Procesando</span>
               </>
             ) : (
               <>
-                <QrCode className="h-4 w-4 transition-transform group-hover:rotate-12" />
+                <QrCode className="h-5 w-5 transition-transform group-hover:rotate-12" />
                 <span>Acortar ahora</span>
               </>
             )}
@@ -156,40 +156,40 @@ export function UrlShortenerTool() {
         </form>
       ) : (
         <div className="animate-in fade-in zoom-in duration-500">
-          <div className="p-6 bg-emerald-50 border border-emerald-100 rounded-2xl">
+          <div className="p-8 bg-emerald-50/50 border border-emerald-100 rounded-[2rem]">
             <div className="flex items-center justify-between mb-4">
-              <p className="text-xs font-bold text-emerald-600 uppercase tracking-wider">¡Link generado exitosamente!</p>
+              <p className="text-[10px] font-black text-emerald-600 uppercase tracking-widest">¡Link generado exitosamente!</p>
               <a 
                 href={shortUrl} 
                 target="_blank" 
                 rel="noopener noreferrer"
-                className="text-emerald-600 hover:text-emerald-700 transition-colors flex items-center gap-1 text-xs font-bold"
+                className="text-emerald-600 hover:text-emerald-700 transition-colors flex items-center gap-1.5 text-xs font-black"
               >
                 Probar enlace <ExternalLink className="h-3 w-3" />
               </a>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-3">
               <input
                 ref={resultInputRef}
                 type="text"
                 readOnly
                 value={shortUrl}
                 onClick={handleInputClick}
-                className="flex-1 bg-white border-none outline-none text-sm font-bold text-slate-900 px-4 py-3 rounded-xl shadow-sm cursor-pointer"
+                className="flex-1 bg-white border border-emerald-100 outline-none text-sm font-black text-slate-900 px-5 py-4 rounded-xl shadow-sm cursor-pointer"
               />
               <button
                 onClick={copyToClipboard}
-                className="p-3 bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 transition-colors shadow-lg shadow-emerald-600/20 active:scale-90 transition-transform"
+                className="p-4 bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 transition-colors shadow-lg shadow-emerald-600/20 active:scale-90 transition-transform"
               >
                 {copied ? <Check className="h-5 w-5" /> : <Copy className="h-5 w-5" />}
               </button>
             </div>
             
-            <div className="mt-8 pt-6 border-t border-emerald-100 flex flex-col items-center">
-              <p className="text-xs text-slate-500 mb-4">¿Necesitas acortar algo más?</p>
+            <div className="mt-8 pt-8 border-t border-emerald-100 flex flex-col items-center">
+              <p className="text-xs font-bold text-slate-400 mb-4 tracking-wide uppercase">¿Necesitas acortar algo más?</p>
               <button 
                 onClick={handleReset}
-                className="flex items-center gap-2 px-6 py-2.5 bg-white border border-slate-200 rounded-full text-sm font-bold text-slate-700 hover:bg-slate-50 transition-all active:scale-95"
+                className="flex items-center gap-2 px-8 py-3.5 bg-white border border-slate-200 rounded-full text-sm font-black text-slate-700 hover:bg-slate-50 transition-all active:scale-95 shadow-sm"
               >
                 <RefreshCcw size={16} />
                 Acortar otro enlace
@@ -200,10 +200,10 @@ export function UrlShortenerTool() {
       )}
 
       {error && (
-        <div className="mt-4 p-4 bg-red-50 border border-red-100 text-red-600 rounded-2xl text-sm animate-in fade-in slide-in-from-top-2 font-medium">
+        <div className="mt-6 p-4 bg-red-50 border border-red-100 text-red-600 rounded-2xl text-sm animate-in fade-in slide-in-from-top-2 font-bold text-center">
           {error}
         </div>
       )}
-    </GlassCard>
+    </div>
   );
 }
