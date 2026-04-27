@@ -4,22 +4,19 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import Cookies from "js-cookie";
 import { User, LayoutDashboard, Settings, LogOut, ChevronDown, Sparkles } from "lucide-react";
-import { authService } from "@/modules/auth/services/auth.service";
 import { siteConfig } from "@/shared/config/site";
 import { cn } from "@/shared/lib/utils";
+import { useAuth } from "@/shared/contexts/AuthContext";
 
 export function PublicNavbar() {
   const pathname = usePathname();
+  const { isAuthenticated, logout } = useAuth();
   const [isMounted, setIsMounted] = useState(false);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   useEffect(() => {
     setIsMounted(true);
-    const token = Cookies.get("token");
-    setIsAuthenticated(!!token);
   }, []);
 
   // Cerrar dropdown al cambiar de ruta
@@ -32,7 +29,7 @@ export function PublicNavbar() {
   }
 
   const handleLogout = () => {
-    authService.logout();
+    logout();
     window.location.href = "/";
   };
 

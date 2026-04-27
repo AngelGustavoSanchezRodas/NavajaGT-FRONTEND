@@ -1,9 +1,6 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import Link from 'next/link';
-import Cookies from 'js-cookie';
-import { LayoutDashboard, Sparkles, Zap, ArrowRight } from 'lucide-react';
 import { BackgroundGlow } from "@/shared/components/ui/BackgroundGlow";
 import { FeaturesGrid } from "@/features/landing/components/FeaturesGrid";
 import { BenefitsSection } from "@/features/landing/components/BenefitsSection";
@@ -13,63 +10,13 @@ import { ContactQrTool } from '@/features/tools/components/ContactQrTool';
 
 export default function Home() {
   const [activeTool, setActiveTool] = useState("shortener");
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
     setIsMounted(true);
-    const token = Cookies.get("token");
-    setIsAuthenticated(!!token);
   }, []);
 
   const renderActiveTool = () => {
-    if (isAuthenticated) {
-      return (
-        <div className="w-full max-w-4xl animate-in fade-in zoom-in slide-in-from-bottom-8 duration-1000">
-          <div className="relative overflow-hidden rounded-[3rem] bg-gradient-to-b from-white/80 to-white/40 p-1 md:p-1.5 backdrop-blur-2xl border border-white shadow-[0_32px_64px_-16px_rgba(0,0,0,0.08)]">
-            <div className="absolute -right-24 -top-24 h-80 w-80 rounded-full bg-brand-turquoise/10 blur-[100px] animate-pulse" />
-            <div className="absolute -left-24 -bottom-24 h-80 w-80 rounded-full bg-brand-magenta/10 blur-[100px] animate-pulse" />
-            
-            <div className="relative z-10 rounded-[2.8rem] bg-white/50 px-8 py-16 md:px-12 md:py-20 flex flex-col items-center text-center">
-              <div className="mb-8 flex h-24 w-24 items-center justify-center rounded-[2rem] bg-slate-900 text-white shadow-2xl shadow-slate-200 rotate-3 hover:rotate-0 transition-transform duration-500">
-                <Sparkles size={48} className="text-brand-turquoise animate-pulse" fill="currentColor" />
-              </div>
-              
-              <h2 className="mb-4 text-4xl font-[950] tracking-tight text-slate-900 md:text-6xl">
-                ¡Hola de nuevo!
-              </h2>
-              <p className="mb-12 max-w-xl text-xl font-medium text-slate-500/90 leading-relaxed">
-                Tu ecosistema digital está listo para la acción. Continúa gestionando tus enlaces y Biolinks con herramientas de alto rendimiento.
-              </p>
-              
-              <Link
-                href="/dashboard"
-                className="group relative flex items-center gap-6 overflow-hidden rounded-full bg-slate-900 px-12 py-6 text-2xl font-black text-white transition-all hover:bg-black hover:scale-105 hover:shadow-[0_20px_50px_-12px_rgba(0,0,0,0.4)] active:scale-95"
-              >
-                <span className="relative z-10 flex items-center gap-3">
-                  Continuar en mi Dashboard
-                  <ArrowRight size={28} className="transition-transform group-hover:translate-x-2" />
-                </span>
-                <div className="absolute inset-0 bg-gradient-to-r from-brand-turquoise/0 via-white/10 to-brand-turquoise/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
-              </Link>
-              
-              <div className="mt-12 flex items-center gap-8 text-slate-400 font-bold text-xs uppercase tracking-widest">
-                <div className="flex items-center gap-2">
-                  <Zap size={14} className="text-brand-turquoise" />
-                  Sincronizado
-                </div>
-                <div className="h-1 w-1 rounded-full bg-slate-200" />
-                <div className="flex items-center gap-2">
-                  <LayoutDashboard size={14} className="text-brand-magenta" />
-                  Premium UI
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      );
-    }
-
     switch (activeTool) {
       case 'biolink':
         return <BiolinkBuilder />;
@@ -110,18 +57,16 @@ export default function Home() {
             ) : renderActiveTool()}
           </div>
 
-          {!isAuthenticated && (
-            <div className="mt-20 flex flex-wrap justify-center gap-5">
-              {['Enlaces', 'Biolinks', 'Seguridad QR', 'Analítica'].map((cat) => (
-                <span 
-                  key={cat}
-                  className="rounded-full bg-white px-8 py-3.5 text-sm font-extrabold text-slate-600 shadow-sm ring-1 ring-slate-100 transition-all hover:scale-105 hover:text-brand-turquoise hover:shadow-xl cursor-default"
-                >
-                  {cat}
-                </span>
-              ))}
-            </div>
-          )}
+          <div className="mt-20 flex flex-wrap justify-center gap-5">
+            {['Enlaces', 'Biolinks', 'Seguridad QR', 'Analítica'].map((cat) => (
+              <span 
+                key={cat}
+                className="rounded-full bg-white px-8 py-3.5 text-sm font-extrabold text-slate-600 shadow-sm ring-1 ring-slate-100 transition-all hover:scale-105 hover:text-brand-turquoise hover:shadow-xl cursor-default"
+              >
+                {cat}
+              </span>
+            ))}
+          </div>
         </section>
 
         {/* Features Grid */}

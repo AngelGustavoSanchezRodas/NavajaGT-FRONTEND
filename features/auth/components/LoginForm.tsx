@@ -5,9 +5,11 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { authService } from "@/modules/auth/services/auth.service";
 import { GlassCard } from "@/shared/components/ui/GlassCard";
+import { useAuth } from "@/shared/contexts/AuthContext";
 
 export function LoginForm() {
   const router = useRouter();
+  const { login } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -18,7 +20,10 @@ export function LoginForm() {
     setIsLoading(true);
 
     try {
-      await authService.login(email, password);
+      const data = await authService.login(email, password);
+      if (data?.token) {
+        login(data.token);
+      }
       toast.success("¡Bienvenido de nuevo!");
       
       setIsRedirecting(true);

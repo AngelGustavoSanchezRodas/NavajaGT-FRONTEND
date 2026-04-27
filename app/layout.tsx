@@ -30,6 +30,8 @@ export const metadata: Metadata = {
   },
 };
 
+import { AuthProvider } from "@/shared/contexts/AuthContext";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -40,8 +42,10 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} bg-slate-50 text-slate-900 antialiased min-h-screen flex flex-col`}
       >
-        <PublicNavbar />
-        <main className="flex-1">{children}</main>
+        <AuthProvider>
+          <PublicNavbar />
+          <main className="flex-1">{children}</main>
+        </AuthProvider>
         <Toaster richColors position="top-right" />
       </body>
     </html>

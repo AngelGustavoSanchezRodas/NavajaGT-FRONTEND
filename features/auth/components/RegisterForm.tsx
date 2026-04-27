@@ -4,8 +4,10 @@ import { FormEvent, useState } from "react";
 import { toast } from "sonner";
 import { authService } from "@/modules/auth/services/auth.service";
 import { GlassCard } from "@/shared/components/ui/GlassCard";
+import { useAuth } from "@/shared/contexts/AuthContext";
 
 export function RegisterForm() {
+  const { login } = useAuth();
   const [nombre, setNombre] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -16,9 +18,15 @@ export function RegisterForm() {
     setIsLoading(true);
 
     try {
-      await authService.register(nombre, email, password);
+      const data = await authService.register(nombre, email, password);
       toast.success("Cuenta creada correctamente");
-      window.location.href = "/login";
+      
+      if (data?.token) {
+        login(data.token);
+        window.location.href = "/";
+      } else {
+        window.location.href = "/login";
+      }
     } catch (error) {
       const message =
         error instanceof Error ? error.message : "No se pudo crear la cuenta";
