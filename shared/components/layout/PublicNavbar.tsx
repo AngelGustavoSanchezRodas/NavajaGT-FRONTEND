@@ -41,20 +41,9 @@ export function PublicNavbar() {
   return (
     <header className="sticky top-0 z-50 w-full border-b border-slate-200/40 bg-white/80 backdrop-blur-md transition-all duration-300">
       <div className="mx-auto flex h-16 w-full max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center gap-2 font-black text-xl tracking-tight">
-          <Link href="/" className="text-brand-turquoise hover:opacity-80 transition-opacity">
-            NavajaGT
-          </Link>
-          <span className="text-slate-300 text-sm">✕</span>
-          <a 
-            href="https://aba-page-nine.vercel.app/" 
-            target="_blank" 
-            rel="noopener noreferrer"
-            className="text-slate-500 text-sm hover:text-brand-turquoise transition-colors pt-0.5"
-          >
-            ABA Estudios
-          </a>
-        </div>
+        <Link href="/" className="flex items-center gap-2 font-black text-xl tracking-tight text-brand-turquoise hover:opacity-80 transition-opacity">
+          NavajaGT
+        </Link>
 
         <div className="flex items-center gap-2 sm:gap-4">
           {!isMounted ? (
@@ -151,7 +140,7 @@ export function PublicNavbar() {
                     href="/register"
                     className="group relative flex items-center gap-2 overflow-hidden rounded-full bg-brand-turquoise px-6 py-2.5 text-sm font-bold text-white transition-all hover:shadow-[0_8px_30px_rgb(45,212,191,0.3)] hover:-translate-y-0.5 active:translate-y-0 active:scale-95"
                   >
-                    <span className="relative z-10">Registrarse</span>
+                    <span className="relative z-10">Registrarse gratis</span>
                     <div className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/20 to-transparent transition-transform duration-500 group-hover:translate-x-full" />
                   </Link>
                 </motion.nav>

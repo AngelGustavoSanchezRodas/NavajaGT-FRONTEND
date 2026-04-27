@@ -8,23 +8,11 @@ import BiolinkBuilder from '@/features/dashboard/components/BiolinkBuilder';
 import { ContactQrTool } from '@/features/tools/components/ContactQrTool';
 
 export default function Home() {
-  const [activeTool, setActiveTool] = useState("shortener");
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
     setIsMounted(true);
   }, []);
-
-  const renderActiveTool = () => {
-    switch (activeTool) {
-      case 'biolink':
-        return <BiolinkBuilder />;
-      case 'qr':
-        return <ContactQrTool />;
-      default:
-        return <UrlShortenerTool />;
-    }
-  };
 
   return (
     <main className="relative min-h-screen bg-slate-50">
@@ -40,7 +28,7 @@ export default function Home() {
           </p>
           
           <div className="w-full max-w-3xl mx-auto mt-6 relative z-20 shadow-2xl rounded-3xl">
-            {isMounted && renderActiveTool()}
+            {isMounted && <UrlShortenerTool />}
           </div>
         </section>
 
@@ -50,7 +38,7 @@ export default function Home() {
             <h2 className="text-4xl font-black tracking-tighter text-slate-900 md:text-5xl">Herramientas Profesionales</h2>
             <p className="mt-6 text-xl font-medium text-slate-500 max-w-2xl mx-auto">Tecnología de vanguardia para escalar tu impacto digital al siguiente nivel.</p>
           </div>
-          <FeaturesGrid onSelectTool={setActiveTool} />
+          <FeaturesGrid />
         </section>
 
         {/* Benefits Section */}

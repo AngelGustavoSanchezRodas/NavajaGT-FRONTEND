@@ -1,5 +1,6 @@
+import NextLink from "next/link";
 import { 
-  Link,
+  Link as LinkIcon,
   Image as ImageIcon,
   Wifi,
   Zap,
@@ -14,9 +15,10 @@ const TOOLS = [
     id: "shortener",
     title: "Acortador Inteligente",
     description: "Crea enlaces cortos, personalizados y rastreables en milisegundos con analíticas en tiempo real.",
-    icon: Link,
+    icon: LinkIcon,
     color: "text-brand-turquoise",
     bgColor: "bg-brand-turquoise/10",
+    href: "/herramientas/acortador"
   },
   {
     id: "biolink",
@@ -25,6 +27,7 @@ const TOOLS = [
     icon: ImageIcon,
     color: "text-brand-magenta",
     bgColor: "bg-brand-magenta/10",
+    href: "/herramientas/biolink"
   },
   {
     id: "wifi",
@@ -33,34 +36,32 @@ const TOOLS = [
     icon: Wifi,
     color: "text-brand-turquoise",
     bgColor: "bg-brand-turquoise/10",
+    href: "/herramientas/qr-wifi"
   }
 ];
 
-export function FeaturesGrid({ onSelectTool }: { onSelectTool?: (id: string) => void }) {
+export function FeaturesGrid() {
   return (
     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
         {TOOLS.map((tool, index) => (
-          <GlassCard 
-            key={index} 
-            onClick={() => {
-              onSelectTool?.(tool.id);
-              window.scrollTo({ top: 0, behavior: 'smooth' });
-            }}
-            className="group flex h-full flex-col p-6 transition-all hover:-translate-y-1 hover:shadow-xl cursor-pointer border-slate-100/50"
-          >
-            <div className={cn(
-              "mb-5 flex h-12 w-12 items-center justify-center rounded-2xl transition-transform group-hover:scale-110",
-              tool.bgColor,
-              tool.color
-            )}>
-              <tool.icon className="h-6 w-6" />
-            </div>
-            <h3 className="mb-2 text-xl font-bold text-slate-900">{tool.title}</h3>
-            <p className="text-sm leading-relaxed text-slate-500">
-              {tool.description}
-            </p>
-          </GlassCard>
+          <NextLink key={index} href={tool.href} className="block h-full">
+            <GlassCard 
+              className="group flex h-full flex-col p-6 transition-all hover:-translate-y-1 hover:shadow-xl cursor-pointer border-slate-100/50"
+            >
+              <div className={cn(
+                "mb-5 flex h-12 w-12 items-center justify-center rounded-2xl transition-transform group-hover:scale-110",
+                tool.bgColor,
+                tool.color
+              )}>
+                <tool.icon className="h-6 w-6" />
+              </div>
+              <h3 className="mb-2 text-xl font-bold text-slate-900">{tool.title}</h3>
+              <p className="text-sm leading-relaxed text-slate-500">
+                {tool.description}
+              </p>
+            </GlassCard>
+          </NextLink>
         ))}
       </div>
     </div>
