@@ -8,6 +8,8 @@ import { BackgroundGlow } from "@/shared/components/ui/BackgroundGlow";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 
+import { ImageConverterTool } from "@/features/tools/components/ImageConverterTool";
+
 export default function ToolPage() {
   const params = useParams();
   const toolId = params.toolId as string;
@@ -23,6 +25,8 @@ export default function ToolPage() {
         return <UrlShortenerTool />;
       case "biolink":
         return <BiolinkBuilder />;
+      case "convertidor":
+        return <ImageConverterTool />;
       default:
         return (
           <div className="text-center py-20">
@@ -39,6 +43,7 @@ export default function ToolPage() {
     switch (toolId) {
       case "acortador": return "Acortador de Enlaces";
       case "biolink": return "Biolink Builder";
+      case "convertidor": return "Convertidor de Imágenes";
       default: return "Herramienta";
     }
   };

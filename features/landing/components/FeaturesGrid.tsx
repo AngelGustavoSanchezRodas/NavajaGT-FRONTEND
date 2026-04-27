@@ -24,6 +24,15 @@ const TOOLS = [
     color: "text-brand-magenta",
     bgColor: "bg-brand-magenta/10",
     href: "/herramientas/biolink"
+  },
+  {
+    id: "convertidor",
+    title: "Convertidor de Imágenes",
+    description: "Cambia el formato de tus imágenes en segundos con calidad profesional.",
+    icon: ImageIcon,
+    color: "text-brand-turquoise",
+    bgColor: "bg-brand-turquoise/10",
+    href: "/herramientas/convertidor"
   }
 ];
 
