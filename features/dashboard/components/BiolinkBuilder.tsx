@@ -191,46 +191,60 @@ const BiolinkBuilder: React.FC = () => {
                       placeholder="mi-marca"
                     />
                   </div>
-                  {aliasError && <p className=\"text-xs text-red-500 font-semibold mt-1\">Este alias ya está en uso. Intenta con otro.</p>}
+                  {aliasError && <p className="text-xs text-red-500 font-semibold mt-1">Este alias ya está en uso. Intenta con otro.</p>}
                 </div>
-            <div className=\"space-y-2\">
-              <label className=\"text-xs font-bold uppercase tracking-wider text-zinc-500\">Título</label>
-              <input
-                type=\"text\"
-                 name=\"titulo\"
-                 value={metadata.titulo}
-                 onChange={handleProfileChange}
-                 className=\"w-full px-4 py-3 border border-zinc-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all text-base\"
-                 placeholder=\"Ej. Juan Pérez\"
-              />
+
+                <div className="space-y-2">
+                  <label className="text-xs font-bold uppercase tracking-wider text-zinc-500">Título</label>
+                  <input
+                    type="text"
+                    name="titulo"
+                    value={metadata.titulo}
+                    onChange={handleProfileChange}
+                    className="w-full px-4 py-3 border border-zinc-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all text-base"
+                    placeholder="Ej. Juan Pérez"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-xs font-bold uppercase tracking-wider text-zinc-500">Descripción</label>
+                  <textarea
+                    name="descripcion"
+                    value={metadata.descripcion}
+                    onChange={handleProfileChange}
+                    rows={3}
+                    className="w-full px-4 py-3 border border-zinc-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all text-base"
+                    placeholder="Cuéntales sobre ti..."
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="text-xs font-bold uppercase tracking-wider text-zinc-500">Avatar URL</label>
+                  <input
+                    type="text"
+                    name="avatarUrl"
+                    value={metadata.avatarUrl}
+                    onChange={handleProfileChange}
+                    className="w-full px-4 py-3 border border-zinc-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all text-base"
+                    placeholder="https://..."
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-xs font-bold uppercase tracking-wider text-zinc-500">Tema</label>
+                  <select
+                    name="tema"
+                    value={metadata.tema}
+                    onChange={handleProfileChange}
+                    className="w-full px-4 py-3 border border-zinc-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all appearance-none bg-white text-base"
+                  >
+                    <option value="LIGHT">Claro</option>
+                    <option value="DARK">Oscuro</option>
+                  </select>
+                </div>
+              </div>
             </div>
-            <div className=\"space-y-2\">
-              <label className=\"text-xs font-bold uppercase tracking-wider text-zinc-500\">Descripción</label>
-              <textarea
-              <label className="text-xs font-bold uppercase tracking-wider text-zinc-500">Avatar URL</label>
-              <input
-                type="text"
-                name="avatarUrl"
-                value={metadata.avatarUrl}
-                onChange={handleProfileChange}
-                className="w-full px-4 py-2 border border-zinc-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all"
-                placeholder="https://..."
-              />
-            </div>
-            <div className="space-y-2">
-              <label className="text-xs font-bold uppercase tracking-wider text-zinc-500">Tema</label>
-              <select
-                name="tema"
-                value={metadata.tema}
-                onChange={handleProfileChange}
-                className="w-full px-4 py-2 border border-zinc-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all appearance-none bg-white"
-              >
-                <option value="LIGHT">Claro</option>
-                <option value="DARK">Oscuro</option>
-              </select>
-            </div>
-          </div>
-        </div>
 
         <div className="space-y-4">
           <div className="flex items-center justify-between border-b border-zinc-100 pb-2">
