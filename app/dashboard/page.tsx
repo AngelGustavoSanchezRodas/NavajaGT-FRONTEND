@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { UrlShortenerTool } from '@/features/links/components/UrlShortenerTool';
 import BiolinkBuilder from '@/features/dashboard/components/BiolinkBuilder';
 import { ContactQrTool } from '@/features/tools/components/ContactQrTool';
+import { ImageConverterTool } from '@/features/tools/components/ImageConverterTool';
 import { GlassCard } from '@/shared/components/ui/GlassCard';
 import { useDashboard } from '@/shared/contexts/DashboardContext';
 import { 
@@ -57,6 +58,14 @@ export default function DashboardPage() {
       icon: QrCode, 
       color: 'bg-brand-mustard/10 text-brand-mustard'
     },
+    {
+      id: 'image-converter',
+      category: 'image-converter',
+      name: 'Convertidor de Imágenes',
+      description: 'Convierte imágenes entre formatos al instante y sin pérdida.',
+      icon: Zap,
+      color: 'bg-slate-900/10 text-slate-900'
+    }
   ];
 
   const filteredTools = activeTab === 'all' || activeTab === 'top'
@@ -87,6 +96,12 @@ export default function DashboardPage() {
         return (
           <div className="animate-in fade-in slide-in-from-bottom-8 duration-500">
             <ContactQrTool />
+          </div>
+        );
+      case 'image-converter':
+        return (
+          <div className="animate-in fade-in slide-in-from-bottom-8 duration-500">
+            <ImageConverterTool />
           </div>
         );
       case 'top':
@@ -122,12 +137,12 @@ export default function DashboardPage() {
               </div>
             </header>
 
-            <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
               {filteredTools.map((tool) => (
                 <button
                   key={tool.id}
                   onClick={() => setActiveTab(tool.id)}
-                  className="group text-left w-full transition-all duration-500 hover:-translate-y-2"
+                  className="group text-left w-full transition-all duration-500 hover:-translate-y-1"
                 >
                   <GlassCard className="p-8 h-full flex flex-col items-start gap-6 cursor-pointer rounded-[2.5rem] border-2 border-transparent transition-all group-hover:border-brand-turquoise/20 group-hover:shadow-[0_40px_80px_-16px_rgba(0,0,0,0.1)]">
                     <div className={cn("p-5 rounded-2xl transition-all duration-500 group-hover:scale-110 group-hover:rotate-3", tool.color)}>

@@ -20,22 +20,30 @@ import { EmptyState } from '@/shared/components/ui/EmptyState';
 import { GlassCard } from '@/shared/components/ui/GlassCard';
 import { cn } from '@/shared/lib/utils';
 import { useCopyToClipboard } from '@/shared/hooks/useCopyToClipboard';
+import { useRouter } from 'next/navigation';
 
 export function LinkList() {
   const [links, setLinks] = useState<EnlaceResponse[]>([]);
   const [loading, setLoading] = useState(true);
   const { copy, copied } = useCopyToClipboard();
   const [activeId, setActiveId] = useState<string | null>(null);
+  const router = useRouter();
 
   useEffect(() => {
     const fetchLinks = async () => {
       try {
-        // Assuming this endpoint exists based on backend context
-        const data = await apiFetch<EnlaceResponse[]>('/api/core/links/');
+        const data = await apiFetch<EnlaceResponse[]>('/api/management/links/list/');
         setLinks(data);
-      } catch (error) {
-        console.error("Error fetching links:", error);
-        // Fallback or empty state
+      } catch (err: unknown) {
+        const error = err as { status?: number; message?: string };
+        
+        if (error.status === 401) {
+          router.push('/login');
+        } else if (error.status === 400) {
+          toast.error(error.message || 'Solicitud incorrecta');
+        } else {
+          toast.error('Error al cargar enlaces');
+        }
       } finally {
         setLoading(false);
       }

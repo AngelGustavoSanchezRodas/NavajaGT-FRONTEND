@@ -37,12 +37,12 @@ export function UrlShortenerTool() {
     setSuccessAlias(null);
 
     try {
-      const response = await apiFetch<ShortenResponse>('/api/core/links/create', {
+      const response = await apiFetch<ShortenResponse>('/api/core/links/create/', {
         method: 'POST',
         body: JSON.stringify({ 
           urlOriginal: url, 
           tipo: 'STANDARD',
-          alias: alias || null
+          aliasPersonalizado: alias || null
         })
       });
       
@@ -53,7 +53,10 @@ export function UrlShortenerTool() {
       if (apiError.status === 402 || apiError.status === 403) {
         setModalMessage(apiError.message || "Tu plan actual no permite realizar esta acción");
         setIsModalOpen(true);
-      } else if (apiError.status === 400 || apiError.status === 409 || apiError.message?.includes('ALIAS_EN_USO')) {
+      } else if (apiError.status === 400) {
+        setError(apiError.message || "Datos incorrectos");
+        toast.error(apiError.message || "Datos incorrectos al acortar el enlace");
+      } else if (apiError.status === 409 || apiError.message?.includes('ALIAS_EN_USO')) {
         setError("El alias ya está en uso o es inválido");
       } else {
         setError(apiError.message || "Ocurrió un error inesperado");
@@ -77,8 +80,7 @@ export function UrlShortenerTool() {
     }
   };
 
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || (typeof window !== 'undefined' ? window.location.origin : '');
-  const shortUrl = successAlias ? `${appUrl}/${successAlias}` : '';
+  const shortUrl = successAlias && typeof window !== 'undefined' ? `${window.location.origin}/${successAlias}` : '';
 
   const handleCopy = () => {
     if (shortUrl) {

@@ -1,6 +1,6 @@
 import Cookies from 'js-cookie';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "https://arq-hexagonal.onrender.com";
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || '';
 
 export interface ApiOptions extends RequestInit {
   responseType?: 'json' | 'blob';
@@ -10,9 +10,11 @@ export async function apiFetch<T>(endpoint: string, options: ApiOptions = {}): P
   const { responseType = 'json', ...fetchOptions } = options;
   const token = Cookies.get('token');
 
-  const defaultHeaders: Record<string, string> = {
-    'Content-Type': 'application/json',
-  };
+  const defaultHeaders: Record<string, string> = {};
+  
+  if (!(fetchOptions.body instanceof FormData)) {
+    defaultHeaders['Content-Type'] = 'application/json';
+  }
 
   if (token) {
     defaultHeaders['Authorization'] = `Bearer ${token}`;

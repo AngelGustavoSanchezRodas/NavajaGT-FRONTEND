@@ -39,15 +39,20 @@ export const ContactQrTool: React.FC = () => {
 
     try {
       const encodedValue = encodeURIComponent(finalValue);
-      const blob = await apiFetch<Blob>(`/api/v1/tools/qr?url=${encodedValue}`, {
+      const blob = await apiFetch<Blob>(`/api/v1/tools/qr?url=${encodedValue}&width=300&height=300`, {
         responseType: 'blob'
       });
       
       const objectUrl = URL.createObjectURL(blob);
       setQrUrl(objectUrl);
       toast.success("¡Código QR generado con éxito!");
-    } catch (error) {
-      toast.error("Error al generar el código QR");
+    } catch (err: unknown) {
+      const error = err as { status?: number; message?: string };
+      if (error.status === 400) {
+        toast.error(error.message || "Datos incorrectos para generar el QR");
+      } else {
+        toast.error("Error al generar el código QR");
+      }
     } finally {
       setLoading(false);
     }

@@ -84,7 +84,7 @@ const BiolinkBuilder: React.FC = () => {
     };
 
     try {
-      const respuesta = await apiFetch<{ alias: string }>('/api/core/links/create', {
+      const respuesta = await apiFetch<{ alias: string }>('/api/core/links/create/', {
         method: 'POST',
         body: JSON.stringify({
           aliasPersonalizado: aliasPersonalizado || null,
@@ -103,6 +103,10 @@ const BiolinkBuilder: React.FC = () => {
       } else if (apiError.status === 409) {
         setAliasError(true);
         setView('editing');
+      } else if (apiError.status === 400) {
+        setGlobalError(apiError.message || 'Datos incorrectos');
+        setView('editing');
+        toast.error(apiError.message || 'Datos incorrectos al guardar el Biolink');
       } else {
         setGlobalError(apiError.message || 'Error al guardar el Biolink');
         setView('editing');
@@ -136,7 +140,7 @@ const BiolinkBuilder: React.FC = () => {
               <input
                 type="text"
                 readOnly
-                value={`navaja.gt/bio/${publishedUrl}`}
+                value={typeof window !== 'undefined' ? `${window.location.origin}/bio/${publishedUrl}` : ''}
                 className="flex-1 bg-transparent border-none outline-none text-sm font-black text-slate-900 px-4 py-2 cursor-text"
                 onClick={(e) => (e.target as HTMLInputElement).select()}
               />

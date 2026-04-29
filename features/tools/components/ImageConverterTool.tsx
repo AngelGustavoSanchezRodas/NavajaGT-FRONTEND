@@ -72,8 +72,13 @@ export function ImageConverterTool() {
 
       const url = URL.createObjectURL(blob);
       setDownloadUrl(url);
-    } catch (err) {
-      setError("No se pudo convertir la imagen. Inténtalo de nuevo.");
+    } catch (err: unknown) {
+      const error = err as { status?: number; message?: string };
+      if (error.status === 400) {
+        setError(error.message || "Formato de imagen no soportado");
+      } else {
+        setError("No se pudo convertir la imagen. Inténtalo de nuevo.");
+      }
     } finally {
       setLoading(false);
     }
