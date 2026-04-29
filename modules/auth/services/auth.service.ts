@@ -1,10 +1,6 @@
 import Cookies from "js-cookie";
 
-if (!process.env.NEXT_PUBLIC_API_URL) {
-  throw new Error("La variable de entorno NEXT_PUBLIC_API_URL no está definida");
-}
-
-const API_URL = `${process.env.NEXT_PUBLIC_API_URL}/api/auth`;
+const API_URL = `${process.env.NEXT_PUBLIC_API_URL || ""}/api/auth`;
 
 export interface AuthResponse {
   token?: string;

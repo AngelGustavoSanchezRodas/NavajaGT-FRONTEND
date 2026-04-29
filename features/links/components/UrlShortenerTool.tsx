@@ -150,13 +150,15 @@ export function UrlShortenerTool() {
                     id="shortener-alias"
                     type="text"
                     value={alias}
-                    onChange={(event) => setAlias(event.target.value)}
+                    onChange={(event) => { setAlias(event.target.value); setError(null); }}
                     placeholder="Alias personalizado (opcional)"
                     disabled={plan === 'FREE'}
-                    className={`h-16 w-full rounded-2xl border border-transparent pl-12 pr-10 text-base outline-none transition-all focus:ring-4 font-medium ${
+                    className={`h-16 w-full rounded-2xl border pl-12 pr-10 text-base outline-none transition-all font-medium ${
                       plan === 'FREE' 
-                        ? 'bg-slate-100 text-slate-400 cursor-not-allowed' 
-                        : 'bg-slate-50 text-slate-900 focus:bg-white focus:border-brand-turquoise/30 focus:ring-brand-turquoise/5 placeholder:text-slate-400'
+                        ? 'border-transparent bg-slate-100 text-slate-400 cursor-not-allowed' 
+                        : error?.includes('alias') || error?.includes('Alias')
+                          ? 'border-red-500 bg-red-50 text-red-900 focus:ring-4 focus:ring-red-500/10 placeholder:text-red-300'
+                          : 'border-transparent bg-slate-50 text-slate-900 focus:bg-white focus:border-brand-turquoise/30 focus:ring-4 focus:ring-brand-turquoise/5 placeholder:text-slate-400'
                     }`}
                   />
                   {plan === 'FREE' && (

@@ -2,9 +2,10 @@
 
 import React, { useState } from 'react';
 import { GlassCard } from '@/shared/components/ui/GlassCard';
-import { QrCode, Link as LinkIcon, Phone, Mail, ArrowRight } from 'lucide-react';
+import { QrCode, Link as LinkIcon, Phone, Mail, ArrowRight, Loader2, Download } from 'lucide-react';
 import { cn } from '@/shared/lib/utils';
 import { toast } from 'sonner';
+import { apiFetch } from '@/shared/lib/api';
 
 type QrType = 'url' | 'tel' | 'email';
 
@@ -13,18 +14,43 @@ export const ContactQrTool: React.FC = () => {
   const [value, setValue] = useState('');
   const [qrUrl, setQrUrl] = useState<string | null>(null);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const [loading, setLoading] = useState(false);
+
+  // Clean up object URLs to prevent memory leaks
+  React.useEffect(() => {
+    return () => {
+      if (qrUrl) URL.revokeObjectURL(qrUrl);
+    };
+  }, [qrUrl]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!value) return;
+
+    setLoading(true);
+    if (qrUrl) {
+      URL.revokeObjectURL(qrUrl);
+      setQrUrl(null);
+    }
 
     let finalValue = value;
     if (type === 'tel') finalValue = `tel:${value}`;
     if (type === 'email') finalValue = `mailto:${value}`;
 
-    const encodedValue = encodeURIComponent(finalValue);
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || '';
-    setQrUrl(`${apiUrl}/api/v1/tools/qr?url=${encodedValue}`);
-    toast.success("¡Código QR generado!");
+    try {
+      const encodedValue = encodeURIComponent(finalValue);
+      const blob = await apiFetch<Blob>(`/api/v1/tools/qr?url=${encodedValue}`, {
+        responseType: 'blob'
+      });
+      
+      const objectUrl = URL.createObjectURL(blob);
+      setQrUrl(objectUrl);
+      toast.success("¡Código QR generado con éxito!");
+    } catch (error) {
+      toast.error("Error al generar el código QR");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -77,18 +103,30 @@ export const ContactQrTool: React.FC = () => {
 
         <button
           type="submit"
-          className="w-full py-4 bg-brand-turquoise text-white rounded-2xl font-black uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-brand-turquoise/90 transition-all shadow-lg shadow-brand-turquoise/20"
+          disabled={loading}
+          className="w-full py-4 bg-brand-turquoise text-white rounded-2xl font-black uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-brand-turquoise/90 transition-all shadow-lg shadow-brand-turquoise/20 disabled:opacity-50"
         >
-          Generar Código QR <ArrowRight size={18} />
+          {loading ? <Loader2 className="animate-spin" size={18} /> : "Generar Código QR"}
+          {!loading && <ArrowRight size={18} />}
         </button>
       </form>
 
       {qrUrl && (
         <div className="mt-12 flex flex-col items-center animate-in fade-in zoom-in-95 duration-500">
-          <div className="p-4 bg-white rounded-[2rem] border-2 border-slate-100 shadow-xl">
+          <div className="p-4 bg-white rounded-[2rem] border-2 border-slate-100 shadow-xl relative group">
             <img src={qrUrl} alt="QR Code" className="w-48 h-48" />
+            
+            <a 
+              href={qrUrl} 
+              download={`navajagt-qr-${type}.png`}
+              className="absolute inset-0 bg-slate-900/40 rounded-[2rem] opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-sm"
+            >
+              <div className="bg-white text-slate-900 px-4 py-2 rounded-xl font-bold flex items-center gap-2 text-sm shadow-xl transform translate-y-2 group-hover:translate-y-0 transition-transform">
+                <Download size={16} /> Descargar
+              </div>
+            </a>
           </div>
-          <p className="mt-4 text-xs font-black uppercase tracking-widest text-slate-400">Escanea para probar</p>
+          <p className="mt-4 text-xs font-black uppercase tracking-widest text-slate-400">Escanea o haz hover para descargar</p>
         </div>
       )}
     </GlassCard>

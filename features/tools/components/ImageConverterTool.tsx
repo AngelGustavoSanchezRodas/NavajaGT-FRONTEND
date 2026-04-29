@@ -4,6 +4,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { Upload, FileImage, X, Download, Loader2, AlertCircle } from "lucide-react";
 import { GlassCard } from "@/shared/components/ui/GlassCard";
 import { cn } from "@/shared/lib/utils";
+import { apiFetch } from "@/shared/lib/api";
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 const ALLOWED_FORMATS = ["JPG", "PNG"];
@@ -63,14 +64,12 @@ export function ImageConverterTool() {
     formData.append("format", format);
 
     try {
-      const response = await fetch("http://localhost:8080/api/v1/tools/convert-image", {
+      const blob = await apiFetch<Blob>('/api/v1/tools/convert-image', {
         method: "POST",
         body: formData,
+        responseType: 'blob'
       });
 
-      if (!response.ok) throw new Error("Error en la conversión");
-
-      const blob = await response.blob();
       const url = URL.createObjectURL(blob);
       setDownloadUrl(url);
     } catch (err) {
