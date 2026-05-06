@@ -1,202 +1,275 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from "react";
-import { Upload, FileImage, X, Download, Loader2, AlertCircle } from "lucide-react";
+import { Upload, X, Download, Loader2, AlertCircle, Lock, Image as ImageIcon } from "lucide-react";
 import { GlassCard } from "@/shared/components/ui/GlassCard";
 import { cn } from "@/shared/lib/utils";
 import { apiFetch } from "@/shared/lib/api";
+import { toast } from "sonner";
+import { useAuth } from "@/shared/contexts/AuthContext";
+import { ProUpgradeModal } from "@/shared/components/ui/ProUpgradeModal";
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
-const ALLOWED_FORMATS = ["JPG", "PNG"];
+
+const FORMATOS = [
+  { id: 'JPG', isPro: false },
+  { id: 'PNG', isPro: false },
+  { id: 'WEBP', isPro: true },
+  { id: 'BMP', isPro: true },
+  { id: 'GIF', isPro: true },
+  { id: 'TIFF', isPro: true },
+];
 
 export function ImageConverterTool() {
-  const [file, setFile] = useState<File | null>(null);
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-  const [format, setFormat] = useState("JPG");
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [downloadUrl, setDownloadUrl] = useState<string | null>(null);
+  const { plan } = useAuth();
+  const [selectedFormat, setSelectedFormat] = useState('JPG');
+  const [files, setFiles] = useState<File[]>([]);
+  const [previews, setPreviews] = useState<string[]>([]);
+  const [isProModalOpen, setIsProModalOpen] = useState(false);
+  const [isConverting, setIsConverting] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
+  const [modalMessage, setModalMessage] = useState("");
   
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // Limpieza de URLs
   useEffect(() => {
     return () => {
-      if (previewUrl) URL.revokeObjectURL(previewUrl);
-      if (downloadUrl) URL.revokeObjectURL(downloadUrl);
+      previews.forEach(url => URL.revokeObjectURL(url));
     };
-  }, [previewUrl, downloadUrl]);
+  }, [previews]);
 
-  const handleFileChange = (selectedFile: File) => {
-    setError(null);
-    setDownloadUrl(null);
+  const handleFormatSelect = (formatId: string, isPro: boolean) => {
+    if (isPro && plan === 'FREE') {
+      setModalMessage(`El formato ${formatId} es exclusivo para usuarios Premium.`);
+      setIsProModalOpen(true);
+      return;
+    }
+    setSelectedFormat(formatId);
+  };
 
-    if (selectedFile.size > MAX_FILE_SIZE) {
-      setError("El archivo es demasiado grande. Máximo 5MB.");
+  const processFiles = (selectedFiles: File[]) => {
+    if (selectedFiles.length === 0) return;
+
+    // Validación de plan para múltiples archivos
+    if (selectedFiles.length > 1 && plan === 'FREE') {
+      setModalMessage("La conversión por lotes es una función Premium. Actualiza para convertir múltiples imágenes a la vez.");
+      setIsProModalOpen(true);
+      if (fileInputRef.current) fileInputRef.current.value = '';
       return;
     }
 
-    if (!selectedFile.type.startsWith("image/")) {
-      setError("Por favor, selecciona un archivo de imagen válido.");
-      return;
-    }
-
-    if (previewUrl) URL.revokeObjectURL(previewUrl);
+    // Validación de tamaño
+    const validFiles = selectedFiles.filter(file => file.size <= MAX_FILE_SIZE && file.type.startsWith("image/"));
     
-    setFile(selectedFile);
-    setPreviewUrl(URL.createObjectURL(selectedFile));
+    if (validFiles.length !== selectedFiles.length) {
+      toast.error("Algunos archivos fueron ignorados por exceder 5MB o no ser imágenes válidas.");
+    }
+
+    if (validFiles.length > 0) {
+      // Limpiar previas anteriores
+      previews.forEach(url => URL.revokeObjectURL(url));
+      
+      setFiles(validFiles);
+      setPreviews(validFiles.map(file => URL.createObjectURL(file)));
+    }
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedFiles = Array.from(e.target.files || []);
+    processFiles(selectedFiles);
   };
 
   const onDrop = (e: React.DragEvent) => {
     e.preventDefault();
     setIsDragging(false);
-    const droppedFile = e.dataTransfer.files[0];
-    if (droppedFile) handleFileChange(droppedFile);
+    const droppedFiles = Array.from(e.dataTransfer.files);
+    processFiles(droppedFiles);
+  };
+
+  const removeFile = (index: number) => {
+    const newFiles = [...files];
+    const newPreviews = [...previews];
+    
+    URL.revokeObjectURL(newPreviews[index]);
+    
+    newFiles.splice(index, 1);
+    newPreviews.splice(index, 1);
+    
+    setFiles(newFiles);
+    setPreviews(newPreviews);
   };
 
   const handleConvert = async () => {
-    if (!file) return;
-    setLoading(true);
-    setError(null);
-
-    const formData = new FormData();
-    formData.append("file", file);
-    formData.append("format", format);
+    if (files.length === 0) return;
+    setIsConverting(true);
 
     try {
-      const blob = await apiFetch<Blob>('/api/v1/tools/convert-image', {
-        method: "POST",
-        body: formData,
-        responseType: 'blob'
+      const conversionPromises = files.map(async (file) => {
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('format', selectedFormat);
+
+        // Usamos apiFetch para mantener la consistencia con el token y el endpoint
+        const blob = await apiFetch<Blob>('/api/v1/tools/convert-image', {
+          method: "POST",
+          body: formData,
+          responseType: 'blob'
+        });
+
+        return { name: file.name, blob };
       });
 
-      const url = URL.createObjectURL(blob);
-      setDownloadUrl(url);
-    } catch (err: unknown) {
-      const error = err as { status?: number; message?: string };
-      if (error.status === 400) {
-        setError(error.message || "Formato de imagen no soportado");
+      const convertedFiles = await Promise.all(conversionPromises);
+
+      // Proceso de descarga
+      convertedFiles.forEach((fileInfo) => {
+        const url = URL.createObjectURL(fileInfo.blob);
+        const link = document.createElement('a');
+        link.href = url;
+        const newName = fileInfo.name.replace(/\.[^/.]+$/, "") + `.${selectedFormat.toLowerCase()}`;
+        link.download = newName;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+        // Retrasamos la limpieza para asegurar que el navegador inicie la descarga
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+      });
+
+      // Upsell Post-Descarga (Hook de Conversión PLG)
+      if (plan === 'FREE') {
+        setTimeout(() => {
+          toast('¡Conversión exitosa! 🚀', {
+            description: 'Desbloquea formatos como WEBP y conversión masiva pasándote a PRO.',
+            action: {
+              label: 'Ver Premium',
+              onClick: () => {
+                setModalMessage("Mejora tu flujo de trabajo con la conversión masiva y formatos de alta eficiencia.");
+                setIsProModalOpen(true);
+              },
+            },
+            duration: 8000,
+          });
+        }, 1500);
       } else {
-        setError("No se pudo convertir la imagen. Inténtalo de nuevo.");
+        toast.success(`¡${files.length} archivo(s) convertido(s) con éxito!`);
       }
+
+    } catch (error) {
+      console.error(error);
+      toast.error('Ocurrió un error en la conversión de algunos archivos.');
     } finally {
-      setLoading(false);
+      setIsConverting(false);
     }
   };
 
-  const handleDownload = () => {
-    if (!downloadUrl) return;
-    const a = document.createElement("a");
-    a.href = downloadUrl;
-    a.download = `navajagt-convertida.${format.toLowerCase()}`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    
-    // La limpieza se maneja en el useEffect o al resetear
-  };
-
-  const reset = () => {
-    setFile(null);
-    if (previewUrl) URL.revokeObjectURL(previewUrl);
-    if (downloadUrl) URL.revokeObjectURL(downloadUrl);
-    setPreviewUrl(null);
-    setDownloadUrl(null);
-    setError(null);
-  };
-
   return (
-    <div className="mx-auto w-full max-w-xl">
-      <GlassCard 
-        className={cn(
-          "relative overflow-hidden transition-all duration-300 border-2 border-dashed",
-          isDragging ? "border-brand-turquoise bg-brand-turquoise/5 scale-[1.02]" : "border-slate-200 bg-white",
-          !file && "cursor-pointer hover:border-brand-turquoise/50"
-        )}
-        onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
-        onDragLeave={() => setIsDragging(false)}
-        onDrop={onDrop}
-        onClick={() => !file && fileInputRef.current?.click()}
-      >
-        <input 
-          type="file" 
-          ref={fileInputRef} 
-          className="hidden" 
-          accept="image/*"
-          onChange={(e) => e.target.files?.[0] && handleFileChange(e.target.files[0])}
-        />
-
-        {!file ? (
-          <div className="py-12 flex flex-col items-center text-center">
-            <div className="w-16 h-16 bg-slate-50 rounded-2xl flex items-center justify-center mb-4 text-slate-400">
-              <Upload size={32} />
+    <div className="mx-auto w-full max-w-xl space-y-6">
+      <GlassCard className="p-6 md:p-8 space-y-8">
+        
+        {/* Dropzone */}
+        <div 
+          className={cn(
+            "relative border-2 border-dashed rounded-2xl p-8 text-center transition-all duration-300",
+            isDragging ? "border-brand-turquoise bg-brand-turquoise/5 scale-[1.02]" : "border-slate-200 bg-slate-50/50 hover:border-brand-turquoise/50"
+          )}
+          onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
+          onDragLeave={() => setIsDragging(false)}
+          onDrop={onDrop}
+        >
+          <input 
+            type="file" 
+            multiple 
+            onChange={handleFileChange}
+            className="hidden" 
+            id="file-upload" 
+            ref={fileInputRef}
+            accept="image/*"
+          />
+          <label htmlFor="file-upload" className="cursor-pointer flex flex-col items-center gap-4">
+            <div className="w-16 h-16 bg-white rounded-2xl shadow-sm flex items-center justify-center text-slate-400">
+              <ImageIcon className="w-8 h-8" />
             </div>
-            <h4 className="text-lg font-bold text-slate-900">Arrastra tu imagen aquí</h4>
-            <p className="text-sm text-slate-500 mt-2">o haz clic para seleccionar (Máx. 5MB)</p>
-          </div>
-        ) : (
-          <div className="space-y-6">
-            <div className="flex items-center gap-4 p-4 bg-slate-50 rounded-2xl relative">
-              <button 
-                onClick={(e) => { e.stopPropagation(); reset(); }}
-                className="absolute -top-2 -right-2 w-6 h-6 bg-white border border-slate-200 rounded-full flex items-center justify-center text-slate-400 hover:text-red-500 shadow-sm transition-colors"
-              >
-                <X size={14} />
-              </button>
-              
-              {previewUrl && (
-                <div className="w-20 h-20 rounded-xl overflow-hidden border border-slate-200 bg-white flex-shrink-0">
-                  <img src={previewUrl} alt="Preview" className="w-full h-full object-cover" />
+            <div>
+              <span className="text-slate-900 font-bold text-lg block">Arrastra tus imágenes aquí</span>
+              <span className="text-sm text-slate-500 font-medium mt-1 block">
+                {plan === 'FREE' ? 'Máx. 1 imagen (Actualiza a PRO para lotes)' : 'Sube múltiples imágenes a la vez'}
+              </span>
+            </div>
+          </label>
+        </div>
+
+        {/* File Previews */}
+        {files.length > 0 && (
+          <div className="space-y-3">
+            <h4 className="text-xs font-black uppercase tracking-widest text-slate-400">Archivos seleccionados ({files.length})</h4>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+              {files.map((file, idx) => (
+                <div key={`${file.name}-${idx}`} className="relative group bg-slate-50 rounded-xl p-2 border border-slate-100 flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-lg overflow-hidden bg-slate-200 flex-shrink-0">
+                    <img src={previews[idx]} alt="preview" className="w-full h-full object-cover" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[10px] font-bold text-slate-700 truncate">{file.name}</p>
+                    <p className="text-[9px] text-slate-500">{(file.size / 1024).toFixed(0)} KB</p>
+                  </div>
+                  <button 
+                    onClick={() => removeFile(idx)}
+                    className="absolute -top-2 -right-2 bg-white border border-slate-200 text-slate-400 hover:text-red-500 rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity shadow-sm"
+                  >
+                    <X size={12} />
+                  </button>
                 </div>
-              )}
-              
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-bold text-slate-900 truncate">{file.name}</p>
-                <p className="text-xs text-slate-500 mt-1">{(file.size / 1024).toFixed(1)} KB</p>
-              </div>
-            </div>
-
-            <div className="flex flex-col gap-4">
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-bold text-slate-700">Convertir a:</span>
-                <select 
-                  value={format}
-                  onChange={(e) => setFormat(e.target.value)}
-                  className="bg-white border border-slate-200 rounded-xl px-4 py-2 text-sm font-bold text-slate-900 outline-none focus:ring-2 focus:ring-brand-turquoise/20"
-                >
-                  {ALLOWED_FORMATS.map(f => <option key={f} value={f}>{f}</option>)}
-                </select>
-              </div>
-
-              {!downloadUrl ? (
-                <button
-                  onClick={(e) => { e.stopPropagation(); handleConvert(); }}
-                  disabled={loading}
-                  className="w-full h-14 bg-brand-turquoise text-white rounded-2xl font-bold flex items-center justify-center gap-2 hover:opacity-90 active:scale-95 transition-all disabled:opacity-50"
-                >
-                  {loading ? <Loader2 className="animate-spin" /> : <FileImage size={20} />}
-                  {loading ? "Procesando..." : "Convertir ahora"}
-                </button>
-              ) : (
-                <button
-                  onClick={(e) => { e.stopPropagation(); handleDownload(); }}
-                  className="w-full h-14 bg-emerald-500 text-white rounded-2xl font-bold flex items-center justify-center gap-2 hover:opacity-90 active:scale-95 transition-all shadow-lg shadow-emerald-500/20"
-                >
-                  <Download size={20} />
-                  Descargar {format}
-                </button>
-              )}
+              ))}
             </div>
           </div>
         )}
 
-        {error && (
-          <div className="mt-4 p-4 bg-red-50 border border-red-100 rounded-xl flex items-center gap-3 text-red-600 text-sm font-medium animate-in fade-in slide-in-from-top-2">
-            <AlertCircle size={18} />
-            {error}
+        {/* Format Selector */}
+        <div className="space-y-4">
+          <h3 className="text-xs font-black uppercase tracking-widest text-slate-400">Formato de Salida</h3>
+          <div className="flex flex-wrap gap-2">
+            {FORMATOS.map((f) => (
+              <button
+                key={f.id}
+                onClick={() => handleFormatSelect(f.id, f.isPro)}
+                className={cn(
+                  "flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-sm font-bold transition-all border-2",
+                  selectedFormat === f.id 
+                    ? "bg-brand-turquoise/10 border-brand-turquoise text-brand-turquoise shadow-sm" 
+                    : "bg-white border-slate-100 text-slate-500 hover:border-slate-200 hover:bg-slate-50"
+                )}
+              >
+                {f.id}
+                {f.isPro && (
+                  <Lock className={cn(
+                    "w-3.5 h-3.5",
+                    selectedFormat === f.id ? "text-brand-turquoise" : "text-brand-mustard"
+                  )} />
+                )}
+              </button>
+            ))}
           </div>
-        )}
+        </div>
+
+        {/* Convert Button */}
+        <button 
+          onClick={handleConvert}
+          disabled={isConverting || files.length === 0}
+          className="group w-full py-5 bg-slate-900 text-white rounded-[1.5rem] font-black uppercase tracking-[0.2em] flex items-center justify-center gap-3 hover:bg-black transition-all shadow-xl shadow-slate-900/10 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          {isConverting ? <Loader2 className="animate-spin w-6 h-6" /> : <Download className="w-6 h-6 group-hover:-translate-y-1 transition-transform" />}
+          {isConverting ? 'Convirtiendo...' : 'Convertir Imagen'}
+        </button>
       </GlassCard>
+
+      <ProUpgradeModal 
+        isOpen={isProModalOpen} 
+        onClose={() => setIsProModalOpen(false)} 
+        message={modalMessage} 
+      />
     </div>
   );
 }
+
