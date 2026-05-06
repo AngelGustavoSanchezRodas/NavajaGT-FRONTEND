@@ -12,13 +12,18 @@ import {
   Download, 
   MessageSquare,
   Palette,
-  CheckCircle2
+  CheckCircle2,
+  Upload,
+  Lock,
+  Grid3X3,
+  Image as ImageIcon
 } from 'lucide-react';
 import { cn } from '@/shared/lib/utils';
 import { toast } from 'sonner';
 import Cookies from 'js-cookie';
 import { useAuth } from '@/shared/contexts/AuthContext';
 import { ProUpgradeModal } from '@/shared/components/ui/ProUpgradeModal';
+import { DownloadUpsellModal } from '@/shared/components/ui/DownloadUpsellModal';
 
 type QrType = 'LINK' | 'WHATSAPP' | 'TELEFONO' | 'EMAIL';
 
@@ -39,6 +44,14 @@ export const ContactQrTool: React.FC = () => {
   const [qrUrl, setQrUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [isProModalOpen, setIsProModalOpen] = useState(false);
+  const [isUpsellModalOpen, setIsUpsellModalOpen] = useState(false);
+  const [selectedPattern, setSelectedPattern] = useState('squares');
+  const [logo, setLogo] = useState<File | null>(null);
+
+  const PRESET_COLORS = [
+    '#000000', '#00E5FF', '#FF0055', '#FFD500', 
+    '#6366F1', '#10B981', '#F59E0B', '#EF4444'
+  ];
 
   const tipoMapa: Record<string, string> = {
     'LINK': 'URL',
@@ -63,12 +76,20 @@ export const ContactQrTool: React.FC = () => {
   }, [qrUrl]);
 
   const handleProInterceptor = (e: React.MouseEvent | React.FocusEvent) => {
+    // Solo informamos, no bloqueamos la generación en esta fase PLG
     if (plan === 'FREE') {
-      e.preventDefault();
-      if ('blur' in e.target) {
-        (e.target as HTMLElement).blur();
+      // Opcional: mostrar un toast sutil o dejar que fluya hasta la descarga
+    }
+  };
+
+  const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (plan === 'FREE') {
+        setIsProModalOpen(true);
+        return;
       }
-      setIsProModalOpen(true);
+      setLogo(file);
     }
   };
 
@@ -147,12 +168,19 @@ export const ContactQrTool: React.FC = () => {
 
   const handleDownload = () => {
     if (!qrUrl) return;
+    
+    // 1. Ejecutar descarga normal
     const link = document.createElement('a');
     link.href = qrUrl;
     link.download = `NavajaGT_QR_${type}.png`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+
+    // 2. Trigger de Conversión (Upsell)
+    setTimeout(() => {
+      setIsUpsellModalOpen(true);
+    }, 500);
   };
 
   return (
@@ -288,53 +316,123 @@ export const ContactQrTool: React.FC = () => {
             )}
           </div>
 
-          {/* Pro Personalization */}
-          <div className="pt-8 border-t border-slate-100">
-            <div className="flex items-center justify-between mb-6">
+          {/* Pro Personalization Redesigned */}
+          <div className="pt-8 border-t border-slate-100 space-y-8">
+            <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Palette className="text-brand-turquoise" size={20} />
                 <h4 className="text-sm font-black uppercase tracking-wider text-slate-900">Personalización Pro</h4>
               </div>
-              {plan === 'FREE' && (
-                <span className="bg-brand-mustard/10 text-brand-mustard text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-widest border border-brand-mustard/20">
-                  Premium
-                </span>
-              )}
             </div>
             
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-              <div className="space-y-3">
-                <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Color de Frente</label>
-                <div className="relative">
-                  <input 
-                    type="color" 
-                    value={foregroundColor} 
-                    onChange={(e) => plan === 'PRO' ? setForegroundColor(e.target.value) : handleProInterceptor(e as any)}
-                    onClick={handleProInterceptor}
-                    onFocus={handleProInterceptor}
-                    className={cn(
-                      "w-full h-14 rounded-2xl cursor-pointer bg-white border-2 border-slate-100 p-1 transition-all",
-                      plan === 'FREE' && "opacity-50 grayscale"
-                    )} 
-                  />
-                  <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[11px] font-black text-slate-400 pointer-events-none">{foregroundColor.toUpperCase()}</span>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              {/* Color Selection */}
+              <div className="space-y-6">
+                <div className="space-y-3">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Colores del QR</label>
+                  <div className="flex flex-wrap gap-2">
+                    {PRESET_COLORS.map(color => (
+                      <button
+                        key={color}
+                        type="button"
+                        onClick={() => setForegroundColor(color)}
+                        className={cn(
+                          "w-8 h-8 rounded-full border-2 transition-all",
+                          foregroundColor === color ? "border-brand-turquoise scale-110 shadow-lg" : "border-transparent"
+                        )}
+                        style={{ backgroundColor: color }}
+                      />
+                    ))}
+                    <div className="relative w-8 h-8 rounded-full border-2 border-slate-200 overflow-hidden">
+                      <input 
+                        type="color" 
+                        value={foregroundColor}
+                        onChange={(e) => setForegroundColor(e.target.value)}
+                        className="absolute inset-0 scale-150 cursor-pointer"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-3">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Fondo</label>
+                  <div className="flex flex-wrap gap-2">
+                    {['#FFFFFF', '#F8FAFC', '#F1F5F9', '#000000'].map(color => (
+                      <button
+                        key={color}
+                        type="button"
+                        onClick={() => setBackgroundColor(color)}
+                        className={cn(
+                          "w-8 h-8 rounded-full border-2 transition-all",
+                          backgroundColor === color ? "border-brand-turquoise scale-110 shadow-lg" : "border-transparent"
+                        )}
+                        style={{ backgroundColor: color }}
+                      />
+                    ))}
+                  </div>
                 </div>
               </div>
+
+              {/* Pattern Selection */}
               <div className="space-y-3">
-                <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Color de Fondo</label>
-                <div className="relative">
-                  <input 
-                    type="color" 
-                    value={backgroundColor} 
-                    onChange={(e) => plan === 'PRO' ? setBackgroundColor(e.target.value) : handleProInterceptor(e as any)}
-                    onClick={handleProInterceptor}
-                    onFocus={handleProInterceptor}
-                    className={cn(
-                      "w-full h-14 rounded-2xl cursor-pointer bg-white border-2 border-slate-100 p-1 transition-all",
-                      plan === 'FREE' && "opacity-50 grayscale"
-                    )} 
-                  />
-                  <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[11px] font-black text-slate-400 pointer-events-none">{backgroundColor.toUpperCase()}</span>
+                <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1 flex items-center gap-2">
+                  <Grid3X3 size={14} /> Patrón de Datos
+                </label>
+                <div className="grid grid-cols-3 gap-2">
+                  {['squares', 'dots', 'rounded'].map(p => (
+                    <button
+                      key={p}
+                      type="button"
+                      onClick={() => setSelectedPattern(p)}
+                      className={cn(
+                        "h-12 rounded-xl border-2 flex items-center justify-center transition-all",
+                        selectedPattern === p ? "border-brand-turquoise bg-brand-turquoise/5 text-brand-turquoise" : "border-slate-100 text-slate-400 hover:border-slate-200"
+                      )}
+                    >
+                      <span className="text-[10px] font-bold uppercase tracking-tighter">{p === 'squares' ? 'Cuadros' : p === 'dots' ? 'Puntos' : 'Smooth'}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Logo Dropzone */}
+            <div className="space-y-3">
+              <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1 flex items-center gap-2">
+                <ImageIcon size={14} /> Logotipo al Centro
+              </label>
+              <div className="relative group">
+                <input 
+                  type="file" 
+                  accept="image/*"
+                  onChange={handleLogoUpload}
+                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                />
+                <div className={cn(
+                  "w-full py-8 border-2 border-dashed rounded-2xl flex flex-col items-center justify-center gap-2 transition-all",
+                  plan === 'FREE' ? "border-slate-100 bg-slate-50/50" : "border-slate-200 group-hover:border-brand-turquoise/50 group-hover:bg-brand-turquoise/5"
+                )}>
+                  {logo ? (
+                    <div className="flex items-center gap-3 bg-white p-2 rounded-xl shadow-sm">
+                      <div className="w-10 h-10 bg-slate-100 rounded-lg overflow-hidden">
+                        <img src={URL.createObjectURL(logo)} alt="Logo preview" className="w-full h-full object-cover" />
+                      </div>
+                      <span className="text-xs font-bold text-slate-700">{logo.name}</span>
+                    </div>
+                  ) : (
+                    <>
+                      <div className="relative">
+                        <Upload className="w-6 h-6 text-slate-400" />
+                        {plan === 'FREE' && (
+                          <div className="absolute -top-1 -right-1 bg-brand-mustard text-white p-0.5 rounded-full ring-2 ring-white">
+                            <Lock size={8} />
+                          </div>
+                        )}
+                      </div>
+                      <p className="text-[11px] font-bold text-slate-500 uppercase tracking-widest">Suelta tu imagen o haz clic</p>
+                      {plan === 'FREE' && <p className="text-[9px] font-medium text-brand-mustard uppercase tracking-tighter">Función Premium</p>}
+                    </>
+                  )}
                 </div>
               </div>
             </div>
@@ -345,7 +443,7 @@ export const ContactQrTool: React.FC = () => {
             disabled={loading}
             className="group w-full py-5 bg-slate-900 text-white rounded-[1.5rem] font-black uppercase tracking-[0.2em] flex items-center justify-center gap-3 hover:bg-black transition-all shadow-xl shadow-slate-900/10 active:scale-[0.98] disabled:opacity-50"
           >
-            {loading ? <Loader2 className="animate-spin" size={24} /> : "Generar QR Premium"}
+            {loading ? <Loader2 className="animate-spin" size={24} /> : "Generar QR"}
             {!loading && <ArrowRight className="group-hover:translate-x-1 transition-transform" size={24} />}
           </button>
         </form>
@@ -379,7 +477,12 @@ export const ContactQrTool: React.FC = () => {
       <ProUpgradeModal 
         isOpen={isProModalOpen} 
         onClose={() => setIsProModalOpen(false)} 
-        message="La personalización de colores de código QR es una función exclusiva de usuarios PRO." 
+        message="Esta función avanzada requiere una cuenta Premium para ser procesada en el resultado final." 
+      />
+
+      <DownloadUpsellModal 
+        isOpen={isUpsellModalOpen}
+        onClose={() => setIsUpsellModalOpen(false)}
       />
     </div>
   );
